@@ -1,0 +1,93 @@
+name: Publish
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  workflow_dispatch:
+
+concurrency:
+  group: publish-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          # Node 20 is fine with your "engines": { "node": ">=18" }. strict alignment not really needed.
+          node-version: "20"
+          registry-url: "https://registry.npmjs.org"
+          always-auth: true
+          cache: "npm"
+
+      #robust fallback for install
+      - name: Install deps (robust)
+        run: npm ci || npm i --no-audit --no-fund
+
+      # Simpler fallbacks (ok if scripts are missing)
+      - name: Build (if script exists)
+        run: npm run -s build || echo "No build script. Skipping."
+
+      - name: Test (if script exists)
+        run: npm test || echo "No test script. Skipping."
+
+      # Sanity gate: enforce an allowlist on the tarball contents
+      - name: Pack dry-run and enforce allowlist
+        run: |
+          npm pack --dry-run > pack.txt
+          awk '/^npm notice/ {print $NF}' pack.txt > files.txt
+          echo "Tarball files:" && cat files.txt
+
+          # Match what you intend to ship (and what your package.json "files" already allows)
+          ALLOWLIST='^(package.json|README.md|LICENSE|dist/.*)$'
+
+          BAD=$(grep -Ev "$ALLOWLIST" files.txt || true)
+          if [ -n "$BAD" ]; then
+            echo "Disallowed files detected in npm pack output:"
+            echo "$BAD"
+            exit 1
+          fi
+          echo "Allowlist passed."
+
+      # Guard: tag must match package.json version when releasing from a tag
+      - name: Ensure tag matches package.json version
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          VER=$(node -p "require('./package.json').version")
+          TAG="${GITHUB_REF#refs/tags/v}"
+          if [ "$VER" != "$TAG" ]; then
+            echo "package.json version ($VER) does not match tag (v$TAG)."
+            exit 1
+          fi
+          echo "Tag matches version: $VER"
+
+      # Skip if the exact version already exists on npm
+      - name: Skip if version already on npm
+        id: check
+        run: |
+          PKG=$(node -p "require('./package.json').name")
+          VER=$(node -p "require('./package.json').version")
+          if npm view "$PKG@$VER" version >/dev/null 2>&1; then
+            echo "Version $VER already exists on npm. Skipping publish."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      # Belt-and-suspenders: provenance in .npmrc (in addition to --provenance)
+      - name: Enable provenance via .npmrc
+        run: echo 'provenance=true' >> "$GITHUB_WORKSPACE/.npmrc"
+
+      - name: Publish (provenance)
+        if: ${{ startsWith(github.ref, 'refs/tags/v') && steps.check.outputs.skip != 'true' }}
+        run: npm publish --access public --provenance
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

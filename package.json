@@ -1,0 +1,59 @@
+{
+  "name": "envsaurus",
+  "version": "0.0.0",
+  "description": "ENVSAURUS is a zero-dependency CLI + library that turns your .env.example into a fully typed config file. It validates environment variables at runtime, fails fast in CI, and exports a safe CONFIG object for Node/TypeScript apps. Catch missing or invalid env vars before your app runs.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "envsaurus": "dist/cli.js"
+  },
+  "scripts": {
+    "clean": "node -e \"try{require('fs').rmSync('dist',{recursive:true,force:true})}catch(e){}\"",
+    "format": "prettier --write \"**/*.{ts,tsx,js,json,md}\"",
+    "lint": "prettier --check \"**/*.{ts,tsx,js,json,md}\"",
+    "build": "tsc -p tsconfig.json && node scripts/ensure-shebang.cjs",
+    "prepack": "npm run format && npm run build",
+    "pack:check": "npm pack --dry-run",
+    "test": "node -e \"console.log('no tests yet')\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/thegreatbey/envsaurus.git"
+  },
+  "bugs": {
+    "url": "https://github.com/thegreatbey/envsaurus/issues"
+  },
+  "homepage": "https://github.com/thegreatbey/envsaurus#readme",
+  "keywords": [
+    "dotenv",
+    "env",
+    "environment",
+    "config",
+    "configuration",
+    "validation",
+    "type-safe",
+    "typescript",
+    "nodejs",
+    "cli",
+    "codegen",
+    "schema",
+    "runtime-checks",
+    "env-vars",
+    "config-generator"
+  ],
+  "author": "thegreatbey",
+  "license": "ISC",
+  "type": "commonjs",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "devDependencies": {
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.2"
+  }
+}
