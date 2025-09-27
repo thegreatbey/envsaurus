@@ -44,7 +44,7 @@ jobs:
       # Sanity gate: enforce an allowlist on the tarball contents
       - name: Pack dry-run and enforce allowlist
         run: |
-          npm pack --dry-run > pack.txt
+          npm pack --dry-run --ignore-scripts > pack.txt
           awk '/^npm notice/ {print $NF}' pack.txt > files.txt
           echo "Tarball files:" && cat files.txt
 
