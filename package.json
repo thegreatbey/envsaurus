@@ -1,6 +1,6 @@
 {
   "name": "envsaurus",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "ENVSAURUS is a zero-dependency CLI + library that turns your .env.example into a fully typed config file. It validates environment variables at runtime, fails fast in CI, and exports a safe CONFIG object for Node/TypeScript apps. Catch missing or invalid env vars before your app runs.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
