@@ -22,5 +22,3 @@ Thumbs.db
 .idea/
 .vscode/
 *.swp
-.cursor/rules/*
-AGENTS.md

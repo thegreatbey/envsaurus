@@ -7,7 +7,7 @@
 [![install size](https://packagephobia.com/badge?p=envsaurus)](https://packagephobia.com/result?p=envsaurus)
 [![license](https://img.shields.io/npm/l/envsaurus)](LICENSE)
 [![install](https://img.shields.io/badge/install-npm%20i%20envsaurus-blue?logo=npm)](https://www.npmjs.com/package/envsaurus)
-[![publish](https://img.shields.io/github/actions/workflow/status/OWNER/REPO/publish.yml?label=publish)](https://github.com/OWNER/REPO/actions/workflows/publish.yml)
+[![publish](https://img.shields.io/github/actions/workflow/status/thegreatbey/envsaurus/publish.yml?label=publish)](https://github.com/thegreatbey/envsaurus/actions/workflows/publish.yml)
 
 Generate typed config from .env.example and validate process.env at runtime.
 
